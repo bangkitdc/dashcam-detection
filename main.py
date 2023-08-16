@@ -1212,7 +1212,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         
             events.append(event)
             
-            event_category = ""
+            event_category = "-"
             if algorithm.check_non_conflict(event):
                 event_category = "Non-Conflict"
             elif algorithm.check_proximity_conflict(event):
@@ -1305,9 +1305,7 @@ class MainWindow(QtWidgets.QMainWindow):
     
     def display_data(self):
         data = self.all_events
-        
-        print("halo123")
-                
+                        
         length = len(data["non_conflict"]) + len(data["proximity_conflict"]) + len(data["crash_relevant_conflict"]) + len(data["near_crash"]) + len(data["crash"])
         self.label_non_conflict_2.setText(str(len(data["non_conflict"])))
         self.label_proximity_conflict_2.setText(str(len(data["proximity_conflict"])))
@@ -1322,7 +1320,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.events = sorted_events
         video_file = self.fileName_1
         
-        print("halo1234")
         for i in range(length):
             self.data = QtWidgets.QFrame(parent=self.scrollAreaWidgetContents)
             self.data.setMinimumSize(QtCore.QSize(0, 90))
@@ -1762,7 +1759,6 @@ class MainWindow(QtWidgets.QMainWindow):
                         
             if (current_time_s >= 60 + count_minute * 60) or (current_time_s == 0 and len(self.time_list) != 0):
                 count_minute += 1
-                print(count_minute)
 
                 # Write to CSV    
                 seconds = self.time_list[-1] if current_time_s == 0 else current_time_s
@@ -1785,19 +1781,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 avg_speed = self.average([item['v_subject'] for item in self.raw_events], count_minute)
                 category_distance = algorithm.distance_category(avg_speed)
                 category_speed = algorithm.speed_category(avg_speed)
-                
-                print(hari, tanggal, waktu, closing_time_avg, reopening_time_avg, closed_time_avg, blink_duration, blink_frequency, microsleep, perclos, avg_distance, category_distance, avg_speed, avg_speed, category_speed)
-                
+                                
                 IO.write_data_to_csv([hari, tanggal, waktu, closing_time_avg, reopening_time_avg, closed_time_avg, blink_duration, blink_frequency, microsleep, perclos, avg_distance, category_distance, avg_speed, avg_speed, category_speed], csv_file)
                 
-                print("IO berhasil")
                 if current_time_s == 0:
                     break
         
-        print("display")
         self.display_data()
                    
-        print("display2") 
         cap.release()
         cv2.destroyAllWindows()
     
