@@ -7,7 +7,10 @@ __pycache__/
 .vs
 
 # dataset
-dataset/
+dataset/1min
+dataset/20sec
+dataset/cam_data
+dataset/test_1
 
 # C extensions
 *.so
