@@ -167,3 +167,6 @@ dataset/*
 
 !dataset/shape_predictor_68_face_landmarks.dat
 !dataset/landmarks_position.webp
+
+# result
+result/
