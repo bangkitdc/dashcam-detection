@@ -169,4 +169,4 @@ dataset/*
 !dataset/landmarks_position.webp
 
 # result
-result/
+result
