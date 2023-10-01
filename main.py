@@ -1483,7 +1483,6 @@ class MainWindow(QtWidgets.QMainWindow):
             self.mediaPlayer2.setMedia(
                 QMediaContent(QtCore.QUrl.fromLocalFile(self.fileName_2)))
             
-            
             # self.setPosition(self.start_time_processed)
             
             self.horizontalSlider.setRange(self.start_time_processed, self.end_time_processed)
@@ -1541,8 +1540,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.webView.setHtml(data.getvalue().decode())
     
     def updateState(self, position):
+        print("updateState")
         range_size = 1000
         index = (position - self.start_time_processed) // range_size
+        print(index, len(self.data_state))
         if (0 <= index < len(self.data_state)):
             start_time = self.data_state[index]['event_time'] - self.start_time - timedelta(seconds=1)
             
@@ -1622,17 +1623,23 @@ class MainWindow(QtWidgets.QMainWindow):
             return distance
 
         def get_blinking_ratio(eye_points, facial_landmarks):
+            print("a")
             left_point = (facial_landmarks.part(eye_points[0]).x, facial_landmarks.part(eye_points[0]).y)
             right_point = (facial_landmarks.part(eye_points[3]).x, facial_landmarks.part(eye_points[3]).y)
             center_top = midpoint(facial_landmarks.part(eye_points[1]), facial_landmarks.part(eye_points[2]))
             center_bot = midpoint(facial_landmarks.part(eye_points[5]), facial_landmarks.part(eye_points[4]))
 
+            print("b")
             hor_line = cv2.line(frame, left_point, right_point, (0, 255, 0), 2)
             ver_line = cv2.line(frame, center_top, center_bot, (0, 255, 0), 2)
 
+            print("c")
             hor_line_length = euclidean_distance(left_point, right_point)
             ver_line_length = euclidean_distance(center_top, center_bot)
 
+            if (ver_line_length == 0):
+                return hor_line_length
+            print(hor_line_length, ver_line_length)
             ratio = hor_line_length/ver_line_length
             return ratio
 
@@ -1660,6 +1667,7 @@ class MainWindow(QtWidgets.QMainWindow):
         flag = False
         
         while True:
+            print("a")
             # Read a frame from the video
             ret, frame = cap.read()
             
@@ -1668,6 +1676,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
             # Convert milliseconds to seconds
             current_time_s = current_time_ms / 1000
+            print(current_time_s)
 
             if current_time_s != 0.0:
                 self.time_list.append(current_time_s)
@@ -1691,14 +1700,20 @@ class MainWindow(QtWidgets.QMainWindow):
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             
             faces = detector(gray)
+            print(faces)
             
             for face in faces:
+                print("1")
                 x, y = face.left(), face.top()
                 x1, y1 = face.right(), face.bottom()    
                 if x < frame.shape[1] // 2:
+                    print("2")
                     cv2.rectangle(frame, (x, y), (x1, y1), (255, 0, 0), 2)
                     
+                    print("landmarks")
                     landmarks = predictor(gray, face)
+                    
+                    print("landmarks2")
                     
                     # LEFT EYE
                     left_eye_ratio = get_blinking_ratio([36, 37, 38, 39, 40, 41], landmarks)
@@ -1706,17 +1721,21 @@ class MainWindow(QtWidgets.QMainWindow):
                     # RIGHT EYE
                     right_eye_ratio = get_blinking_ratio([42, 43, 44, 45, 46, 47], landmarks)
                                             
+                    print("2.5")
                     if left_eye_ratio > 6 and right_eye_ratio > 6 and current_time_s != 0.0:
                         # closed
+                        print("closed")
                         flag = True
                         self.closed_list.append(current_time_s)
                         closed_list_csv.append(current_time_s)
                         self.time_list_processed.append(current_time_s)
+                        print("done")
 
                         # if prev_ratio_left < 6 and prev_ratio_right < 6:
                         #     count += 1
                     elif left_eye_ratio > prev_ratio_left and right_eye_ratio > prev_ratio_right and left_eye_ratio > 4 and right_eye_ratio > 4 and current_time_s != 0.0:
                         # closing
+                        print("closing")
                         flag = True
                         self.closing_list.append(current_time_s)
                         closing_list_csv.append(current_time_s)
@@ -1724,11 +1743,13 @@ class MainWindow(QtWidgets.QMainWindow):
 
                     elif left_eye_ratio <= prev_ratio_left and right_eye_ratio <= prev_ratio_right and left_eye_ratio > 4 and right_eye_ratio > 4 and current_time_s != 0.0:
                         # reopening
+                        print("reopening")
                         flag = True
                         self.reopening_list.append(current_time_s)
                         reopening_list_csv.append(current_time_s)
                         self.time_list_processed.append(current_time_s)
                     else:
+                        print("else")
                         if len(self.time_list_processed) > 5:
                             last_five_elements = self.time_list_processed[-5:]
                             all_negative_ones = all(num == -1 for num in last_five_elements)
@@ -1740,9 +1761,12 @@ class MainWindow(QtWidgets.QMainWindow):
                             else:
                                 self.time_list_processed.append(-1)
 
+                    print("2.7")
                     prev_ratio_left = left_eye_ratio
                     prev_ratio_right = right_eye_ratio
+                    print("2.8")
             
+            print("3")
             # Create a black background image with the desired display resolution
             display_frame = np.zeros((display_height, display_width, 3), dtype=np.uint8)
             x_offset = (display_width - new_width) // 2
@@ -1756,6 +1780,8 @@ class MainWindow(QtWidgets.QMainWindow):
             key = cv2.waitKey(1)
             if key == 27:
                 break
+                
+            print("4")
                         
             if (current_time_s >= 60 + count_minute * 60) or (current_time_s == 0 and len(self.time_list) != 0):
                 count_minute += 1

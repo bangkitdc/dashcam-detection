@@ -6,7 +6,7 @@ def check_non_conflict(event):
     # accel.y < 0.4
     # jarak = 65.54
 
-    if (80 <= event['v_subject'] <= 100) and (event['accel_y'] < 0.4) and (event['distance'] == 65.54):
+    if (80 <= event['v_subject'] <= 100) and (event['accel_y'] < 0.1) and (event['distance'] == 65.54):
         return True
 
     return False
@@ -16,7 +16,7 @@ def check_proximity_conflict(event):
     # accel.y > 0.4
     # jarak = 65.54
     
-    if (80 <= event['v_subject'] <= 140) and (event['accel_y'] > 0.4) and (event['distance'] == 65.54):
+    if (80 <= event['v_subject'] <= 100) and (0.1 <= event['accel_y'] <= 0.2) and (event['distance'] == 65.54):
         return True
 
     return False
@@ -26,7 +26,7 @@ def check_crash_relevant_conflict(event):
     # accel.y > 0.4
     # jarak 30 < x < 65.54
 
-    if (80 <= event['v_subject'] <= 100) and (event['accel_y'] > 0.4) and (30 < event['distance'] < 65.54):
+    if (80 <= event['v_subject'] <= 100) and (0.2 < event['accel_y'] <= 0.4) and (30 < event['distance'] < 65.54):
         return True
 
     return False
